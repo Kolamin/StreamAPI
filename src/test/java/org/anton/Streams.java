@@ -2,6 +2,7 @@ package org.anton;
 
 import org.anton.domain.Department;
 import org.anton.domain.Employee;
+import org.anton.domain.Event;
 import org.anton.domain.Position;
 import org.junit.Test;
 
@@ -64,6 +65,12 @@ public class Streams {
                     .add("Mike")
                     .add("Joe")
                     .build();
+
+            Stream<Employee> stream1 = emps.stream();
+            Stream<Employee> employeeStream = emps.parallelStream();
+
+            Stream<Event> generate = Stream.generate(() ->
+                    new Event(UUID.randomUUID(), LocalDateTime.now(), ""));
         }
 
 }
