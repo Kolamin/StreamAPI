@@ -19,7 +19,7 @@ import java.util.stream.*;
 import java.util.*;
 
 public class Streams {
-        private List<Employee> emps = Arrays.asList(
+        private List<Employee> emps = List.of(
                 new Employee("Michael", "Smith",   243,  43, Position.CHEF),
                 new Employee("Jane",    "Smith",   523,  40, Position.MANAGER),
                 new Employee("Jury",    "Gagarin", 6423, 26, Position.MANAGER),
@@ -71,6 +71,79 @@ public class Streams {
 
             Stream<Event> generate = Stream.generate(() ->
                     new Event(UUID.randomUUID(), LocalDateTime.now(), ""));
+
+            Stream<Integer> iterate = Stream.iterate(1950, val -> val + 3);
+
+            Stream<String> concat = Stream.concat(stringStream, build);
+        }
+
+        @Test
+        public void terminate(){
+            long count = emps.stream().count();
+
+            emps.stream().forEach(employee -> System.out.println(employee.getAge()));
+
+            //Преобразование к колекции
+            List<Employee> collect = emps.stream().collect(Collectors.toList());
+            //Преобразование к коллекции
+            emps.stream().toArray();
+
+            //Преобразовать простую коллекцию в Map
+            Map<Integer, String> collect1 = emps.stream().collect(Collectors.toMap(
+                    Employee::getId,
+                    emp -> String.format("%s %s", emp.getLastName(), emp.getFirstName())
+            ));
+
+            //Сложение в stream
+            IntStream intStream = IntStream.of(100, 200, 300, 400);
+            intStream.reduce((left, right) -> left + right).orElse(0);
+
+            System.out.println(deps.stream().reduce(this::reducer));
+        }
+
+        @Test
+        public void transform(){
+            LongStream longStream = IntStream.of(100, 200, 300, 400).mapToLong(Long::valueOf);
+            IntStream.of(100, 200, 300, 400).mapToObj(value ->
+                    new Event(UUID.randomUUID(),LocalDateTime.of(value, 12, 1, 12, 0), ""));
+
+            emps.stream().takeWhile(employee -> employee.getAge() > 30).forEach(System.out::println);
+            System.out.println();
+            emps.stream().dropWhile(employee -> employee.getAge() > 30).forEach(System.out::println);
+
+            IntStream.of(100, 200, 300, 400).
+                    flatMap(value -> IntStream.of(value - 50, value)).forEach(System.out::println);
+
+        }
+
+        @Test
+        public void real(){
+            Stream<Employee> empl = emps.stream()
+                    .filter(employee ->
+                            employee.getAge() <= 30 && employee.getPosition() != Position.WORKER)
+                    .sorted(Comparator.comparing(Employee::getLastName));
+            print(empl);
+        }
+
+        private void print(Stream<Employee> stream){
+            stream.map(emp -> String.format(
+                   "%4d | %-15s %-10s age %s %s",
+                    emp.getId(),
+                    emp.getLastName(),
+                    emp.getFirstName(),
+                    emp.getAge(),
+                    emp.getPosition()
+            )).forEach(System.out::println);
+        }
+
+        public Department reducer(Department parent, Department child){
+            if (child.getParent() == parent.getId()){
+                parent.getChild().add(child);
+            }else{
+                parent.getChild().forEach(subpurent -> reducer(subpurent, child));
+            }
+            return  parent;
         }
 
 }
+
